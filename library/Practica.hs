@@ -4,20 +4,21 @@
 module Practica where
 
 import Control.Concurrent.STM
-import Control.Monad
+-- import Control.Monad
 
 data Item = RedScroll
             | BlueScroll
             | Axe
             deriving (Eq, Ord, Show)
-
+newtype Gold = Gold Int
+    deriving (Eq, Ord, Show, Num)
 newtype HitPoint = HitPoint Int
     deriving (Eq, Ord, Show, Num)
 
 type InventoryOut = [Item]
 type Inventory = TVar [Item]
 type Health = TVar HitPoint
-type Account = TVar Int
+type Account = TVar Gold
 
 data Player = Player {
     account :: Account,
@@ -33,10 +34,10 @@ removeInv x xs =
 
 -- Transferir oro de una cuenta a otra
 -- Nota: Lo que hay es una intuicion, el codigo esta incompleto y hay cosas por agregar
-transfer :: Int -> Account -> Account -> STM ()
+transfer :: Gold -> Account -> Account -> STM ()
 transfer gold fromAcc toAcc = do
     fromQty <- readTVar fromAcc
-    writeTVar toAcc (fromQty + qty)
+    writeTVar toAcc (fromQty + gold)
 
 -- Transferir un item
 -- Nota: Lo que hay es una intuicion, el codigo esta incompleto y hay cosas por agregar
@@ -50,6 +51,6 @@ giveItem item fromInv toInv = do
 
 -- Vender un Item, ver si la firma es la correcta
 -- Nota: Lo que hay es una intuicion, el codigo esta incompleto y hay cosas por agregar  
-sellItem :: Item -> Int -> Player -> Player -> ()
+sellItem :: Item -> Gold -> Player -> Player -> STM()
 sellItem item price buyer seller = do
-  transfer price (balance buyer) (balance seller)
+  transfer price (account buyer) (account seller)
